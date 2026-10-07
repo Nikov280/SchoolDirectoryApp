@@ -1,0 +1,81 @@
+﻿@page "/favorites"
+@using SchoolDirectoryApp.Models
+@using SchoolDirectoryApp.Services
+@using SchoolDirectoryApp.Components
+@inject SchoolService SchoolService
+@inject AppStateService AppState
+@rendermode InteractiveServer
+
+<h3 class="display-6 fw-bold text-warning mb-4 border-bottom pb-2">Favorite Schools</h3>
+
+@if (error)
+{
+    <div class="alert alert-danger">Unable to retrieve school data.</div>
+}
+else if (schools == null)
+{
+    <div class="d-flex align-items-center text-primary">
+        <strong>Loading favorites...</strong>
+        <div class="spinner-border ms-auto" role="status" aria-hidden="true"></div>
+    </div>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-5">
+            <div class="pe-2" style="max-height: 75vh; overflow-y: auto;">
+                @if (FavoriteSchools.Any())
+                {
+                    @foreach (var school in FavoriteSchools)
+                    {
+                        <SchoolCard School="school" 
+                                    IsSelected="school.SchoolId == selectedSchool?.SchoolId" 
+                                    OnSelect="HandleSchoolSelection" />
+                    }
+                }
+                else
+                {
+                    <div class="alert alert-info">
+                        You haven't added any favorite schools yet. Go to the <a href="schools">Schools Directory</a> to add some!
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="col-md-7">
+            <SchoolDetails SelectedSchool="selectedSchool" />
+        </div>
+    </div>
+}
+
+@code {
+    private List<School>? schools;
+    private School? selectedSchool;
+    private bool error = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        AppState.OnChange += StateHasChanged;
+        try
+        {
+            schools = await SchoolService.GetSchoolsAsync();
+        }
+        catch (Exception)
+        {
+            error = true;
+        }
+    }
+
+    public void Dispose()
+    {
+        AppState.OnChange -= StateHasChanged;
+    }
+
+    private IEnumerable<School> FavoriteSchools => 
+        schools?.Where(s => AppState.IsFavorite(s.SchoolId)) ?? Enumerable.Empty<School>();
+
+    private void HandleSchoolSelection(School school)
+    {
+        selectedSchool = school;
+    }
+}

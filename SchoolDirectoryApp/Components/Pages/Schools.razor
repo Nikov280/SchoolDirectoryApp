@@ -1,0 +1,127 @@
+﻿@page "/schools"
+@page "/"
+@using SchoolDirectoryApp.Models
+@using SchoolDirectoryApp.Services
+@using SchoolDirectoryApp.Components
+@inject SchoolService SchoolService
+@rendermode InteractiveServer
+
+<style>
+    /* Default height for mobile devices to prevent pushing the details card too far down */
+    .school-list-container {
+        max-height: 35vh; 
+        overflow-y: auto;
+    }
+    
+    /* Taller height for desktop screens (768px and wider) */
+    @@media (min-width: 768px) {
+        .school-list-container {
+            max-height: 75vh;
+        }
+    }
+</style>
+
+<h3 class="display-6 fw-bold text-primary mb-4 border-bottom pb-2">School Directory</h3>
+
+@if (error)
+{
+    <div class="alert alert-danger" role="alert">
+        Unable to retrieve school data. Please try again later.
+    </div>
+}
+else if (schools == null)
+{
+    <div class="d-flex align-items-center text-primary">
+        <strong>Loading schools...</strong>
+        <div class="spinner-border ms-auto" role="status" aria-hidden="true"></div>
+    </div>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-5">
+            <!-- Enhanced Search Input with Clear Button -->
+            <div class="input-group mb-4 shadow-sm">
+                <span class="input-group-text bg-white text-muted border-end-0">
+                    <i class="bi bi-search"></i> Search
+                </span>
+                
+                <!-- Search input. Border changes dynamically if the clear button is shown -->
+                <input @bind="Search" 
+                       @bind:event="oninput" 
+                       class="form-control form-control-lg border-start-0 @(string.IsNullOrEmpty(Search) ? "" : "border-end-0")" 
+                       placeholder="Type a school name..." 
+                       style="box-shadow: none;" />
+                
+                <!-- Conditionally render the 'X' button only when there is text in the search bar -->
+                @if (!string.IsNullOrEmpty(Search))
+                {
+                    <button class="btn btn-outline-secondary bg-white border border-start-0 text-muted" 
+                            type="button" 
+                            @onclick="ClearSearch" 
+                            style="border-color: #dee2e6 !important;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
+                        </svg>
+                    </button>
+                }
+            </div>
+
+            <!-- Applied the responsive CSS class here instead of hardcoded inline styles -->
+            <div class="pe-2 school-list-container">
+                @if (FilteredSchools.Any())
+                {
+                    @foreach (var school in FilteredSchools)
+                    {
+                        <SchoolCard School="school" 
+                                    IsSelected="school.SchoolId == selectedSchool?.SchoolId" 
+                                    OnSelect="HandleSchoolSelection" />
+                    }
+                }
+                else
+                {
+                    <div class="alert alert-warning">No schools found matching "@Search".</div>
+                }
+            </div>
+        </div>
+
+        <div class="col-md-7">
+            <SchoolDetails SelectedSchool="selectedSchool" />
+        </div>
+    </div>
+}
+
+@code {
+    private List<School>? schools;
+    private School? selectedSchool;
+    private string Search { get; set; } = string.Empty;
+    private bool error = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            schools = await SchoolService.GetSchoolsAsync();
+        }
+        catch (Exception)
+        {
+            error = true;
+        }
+    }
+
+    private IEnumerable<School> FilteredSchools =>
+        string.IsNullOrWhiteSpace(Search)
+            ? schools!
+            : schools!.Where(s => s.SchoolName.Contains(Search, StringComparison.OrdinalIgnoreCase));
+
+    private void HandleSchoolSelection(School school)
+    {
+        selectedSchool = school;
+    }
+
+    // Method to clear the search input and reset the filter
+    private void ClearSearch()
+    {
+        Search = string.Empty;
+    }
+}

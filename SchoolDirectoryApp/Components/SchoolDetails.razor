@@ -1,0 +1,56 @@
+﻿@using SchoolDirectoryApp.Models
+
+<div class="card border-0 shadow-sm mt-4 mt-md-0">
+    <div class="card-header bg-primary text-white py-3">
+        <h4 class="mb-0 fw-bold">School Information</h4>
+    </div>
+    <div class="card-body">
+        @if (SelectedSchool != null)
+        {
+            <div class="row g-3">
+                <!-- Using Bootstrap Grid to format details cleanly -->
+                <div class="col-sm-6">
+                    <p class="text-muted mb-1 small">School Name</p>
+                    <p class="fw-bold">@SelectedSchool.SchoolName</p>
+                </div>
+                <div class="col-sm-6">
+                    <p class="text-muted mb-1 small">School ID</p>
+                    <p class="fw-bold">@SelectedSchool.SchoolId</p>
+                </div>
+                <div class="col-12">
+                    <p class="text-muted mb-1 small">Address</p>
+                    <p class="fw-bold">@SelectedSchool.Address</p>
+                </div>
+                <div class="col-sm-6">
+                    <p class="text-muted mb-1 small">Phone Number</p>
+                    <p class="fw-bold">@SelectedSchool.PhoneNo</p>
+                </div>
+                <div class="col-sm-6">
+                    <p class="text-muted mb-1 small">Email Address</p>
+                    <p class="fw-bold">@SelectedSchool.EmailAddress</p>
+                </div>
+                <hr class="my-2" />
+                <div class="col-sm-6">
+                    <p class="text-muted mb-1 small">Proprietor</p>
+                    <p class="fw-bold text-success">@SelectedSchool.ProprietorFullName</p>
+                </div>
+                <div class="col-sm-6">
+                    <p class="text-muted mb-1 small">Head Teacher</p>
+                    <p class="fw-bold text-info">@SelectedSchool.HeadFullName</p>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="text-center text-muted p-5">
+                <i class="bi bi-cursor fs-1 mb-3 d-block"></i>
+                <p class="lead">Select a school from the list to view its complete details here.</p>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public School? SelectedSchool { get; set; }
+}
