@@ -1,0 +1,49 @@
+﻿@using SchoolDirectoryApp.Models
+
+<!-- Statistics Dashboard displaying key metrics -->
+<div class="row mb-4">
+    <div class="col-md-4 mb-3 mb-md-0">
+        <div class="card bg-primary text-white shadow-sm border-0">
+            <div class="card-body d-flex flex-column align-items-center">
+                <h6 class="card-title text-uppercase fw-bold text-white-50 mb-1">Total Schools</h6>
+                <h2 class="mb-0 fw-bold">@TotalSchools</h2>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-3 mb-md-0">
+        <div class="card bg-success text-white shadow-sm border-0">
+            <div class="card-body d-flex flex-column align-items-center">
+                <h6 class="card-title text-uppercase fw-bold text-white-50 mb-1">Unique Proprietors</h6>
+                <h2 class="mb-0 fw-bold">@UniqueProprietors</h2>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card bg-info text-white shadow-sm border-0">
+            <div class="card-body d-flex flex-column align-items-center">
+                <h6 class="card-title text-uppercase fw-bold text-white-50 mb-1">With Email Contact</h6>
+                <h2 class="mb-0 fw-bold">@SchoolsWithEmail</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    // Parameter receiving the full list of schools
+    [Parameter]
+    public List<School>? Schools { get; set; }
+
+    // Calculated statistics using LINQ
+    private int TotalSchools => Schools?.Count ?? 0;
+    
+    // Counts how many distinct proprietor names exist
+    private int UniqueProprietors => Schools?.Select(s => s.ProprietorFullName)
+                                             .Where(name => !string.IsNullOrWhiteSpace(name))
+                                             .Distinct()
+                                             .Count() ?? 0;
+                                             
+    // Counts how many schools have an email address listed
+    private int SchoolsWithEmail => Schools?.Count(s => !string.IsNullOrWhiteSpace(s.EmailAddress)) ?? 0;
+}
